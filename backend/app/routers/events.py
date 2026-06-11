@@ -10,23 +10,23 @@ router = APIRouter(prefix="/api/events", tags=["events"])
 
 @router.get("", response_model=EventListResponse)
 async def list_events(
-    upcoming_limit: int = Query(20, ge=1, le=100),
+    upcoming_days: int = Query(30, ge=1, le=90, description="Days ahead for upcoming events"),
     historical_limit: int = Query(50, ge=1, le=500),
     session: AsyncSession = Depends(get_session),
 ) -> EventListResponse:
     service = EventService(session)
-    upcoming = await service.get_upcoming(limit=upcoming_limit)
+    upcoming = await service.get_upcoming(days=upcoming_days)
     historical = await service.get_historical(limit=historical_limit)
     return EventListResponse(upcoming=upcoming, historical=historical)
 
 
 @router.get("/upcoming", response_model=list[EventResponse])
 async def upcoming_events(
-    limit: int = Query(20, ge=1, le=100),
+    days: int = Query(30, ge=1, le=90, description="Days ahead"),
     session: AsyncSession = Depends(get_session),
 ) -> list[EventResponse]:
     service = EventService(session)
-    return await service.get_upcoming(limit=limit)
+    return await service.get_upcoming(days=days)
 
 
 @router.get("/next", response_model=EventResponse | None)

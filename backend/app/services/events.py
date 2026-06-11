@@ -8,12 +8,14 @@ class EventService:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get_upcoming(self, limit: int = 20) -> list[EventResponse]:
+    async def get_upcoming(self, days: int = 30) -> list[EventResponse]:
         stmt = text(
-            "SELECT * FROM events WHERE scheduled_at >= datetime('now') "
-            "ORDER BY scheduled_at ASC LIMIT :limit"
+            "SELECT * FROM events "
+            "WHERE scheduled_at >= datetime('now') "
+            "AND scheduled_at <= datetime('now', '+' || :days || ' days') "
+            "ORDER BY scheduled_at ASC"
         )
-        result = await self._session.execute(stmt, {"limit": limit})
+        result = await self._session.execute(stmt, {"days": days})
         return [EventResponse(**dict(row._mapping)) for row in result.all()]
 
     async def get_historical(self, limit: int = 50) -> list[EventResponse]:
