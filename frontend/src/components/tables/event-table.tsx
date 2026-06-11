@@ -58,6 +58,9 @@ export function EventTable({ events, showCountdown = false }: EventTableProps) {
               Impact
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-400">
+              Pairs
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-400">
               Forecast
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-400">
@@ -71,7 +74,7 @@ export function EventTable({ events, showCountdown = false }: EventTableProps) {
         <tbody>
           {events.map((event) => (
             <tr
-              key={event.id}
+              key={`${event.title}-${event.scheduled_at}`}
               className="border-b border-slate-800 transition-colors hover:bg-slate-800/30"
             >
               {showCountdown && (
@@ -92,6 +95,19 @@ export function EventTable({ events, showCountdown = false }: EventTableProps) {
                 <Badge variant={impactVariant[event.impact] ?? "muted"}>
                   {event.impact}
                 </Badge>
+              </td>
+              <td className="px-3 py-2">
+                {event.pairs && event.pairs.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {event.pairs.map((p) => (
+                      <Badge key={p.instrument} variant="default">
+                        {p.instrument}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  "-"
+                )}
               </td>
               <td className="whitespace-nowrap px-3 py-2 font-mono text-slate-300">
                 {event.forecast ?? "-"}

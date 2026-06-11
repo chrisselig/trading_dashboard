@@ -18,6 +18,13 @@ class Settings(BaseSettings):
         / "config"
         / "settings.yaml"
     )
+    calendar_json_path: str = str(
+        Path.home()
+        / "00_data_projects"
+        / "trading_dashboard"
+        / "data"
+        / "calendar.json"
+    )
     api_host: str = "0.0.0.0"
     api_port: int = 8000
 

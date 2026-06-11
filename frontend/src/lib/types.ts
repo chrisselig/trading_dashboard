@@ -69,8 +69,15 @@ export interface Performance {
   pnl_by_strategy: PnlByGroup[];
 }
 
+export interface StraddleParams {
+  instrument: string;
+  straddle_distance_pips: number;
+  straddle_tp_pips: number;
+  straddle_sl_pips: number;
+}
+
 export interface EconomicEvent {
-  id: number;
+  id: number | null;
   title: string;
   country: string;
   impact: string;
@@ -79,7 +86,9 @@ export interface EconomicEvent {
   forecast: string | null;
   previous: string | null;
   fred_series: string | null;
-  created_at: string;
+  created_at: string | null;
+  source: string | null;
+  pairs: StraddleParams[];
 }
 
 export interface EventListResponse {
