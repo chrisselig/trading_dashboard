@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /home/doopdeep/00_data_projects/forex_trading_bot/*.md 2>/dev/null || echo \"No markdown files in root\")",
+      "Bash(grep -n \"class.*StrEnum\\\\|class.*Enum\" /home/doopdeep/00_data_projects/forex_trading_bot/src/forex_bot/models/*.py)",
+      "Bash(cd /home/doopdeep/00_data_projects/trading_dashboard/backend && ~/anaconda3/envs/forex-bot/bin/pip install -q fastapi uvicorn[standard] sqlalchemy[asyncio] aiosqlite pydantic pydantic-settings pyyaml 2>&1 | tail -5)",
+      "Bash(~/anaconda3/envs/forex-bot/bin/python -c \"from app.main import app; print\\('App imports OK'\\); print\\('Routes:'\\); [print\\(f'  {r.methods} {r.path}'\\) for r in app.routes if hasattr\\(r, 'methods'\\)]\")",
+      "Bash(~/anaconda3/envs/forex-bot/bin/python -c \"\nimport asyncio\nfrom app.main import app\nfrom app.db import get_session\n\nasync def test\\(\\):\n    async for session in get_session\\(\\):\n        from app.services.trades import TradeService\n        from app.services.performance import PerformanceService\n        from app.services.events import EventService\n        from app.services.system import SystemService\n        \n        ts = TradeService\\(session\\)\n        trades = await ts.get_recent_trades\\(2\\)\n        print\\(f'Recent trades: {len\\(trades\\)}'\\)\n        for t in trades:\n            print\\(f'  {t.instrument} {t.side} pnl={t.pnl}'\\)\n        \n        count = await ts.count_trades\\(\\)\n        print\\(f'Total trades: {count}'\\)\n        \n        pnl = await ts.get_todays_pnl\\(\\)\n        print\\(f'Todays PnL: {pnl}'\\)\n        \n        ps = PerformanceService\\(session\\)\n        perf = await ps.get_performance\\(\\)\n        print\\(f'Win rate: {perf.win_rate:.2%}, Sharpe: {perf.sharpe_ratio:.2f}, Max DD: {perf.max_drawdown:.2f}'\\)\n        print\\(f'Equity curve points: {len\\(perf.equity_curve\\)}'\\)\n        print\\(f'PnL by pair: {[\\(p.group, p.total_pnl\\) for p in perf.pnl_by_pair]}'\\)\n        \n        es = EventService\\(session\\)\n        upcoming = await es.get_upcoming\\(3\\)\n        print\\(f'Upcoming events: {len\\(upcoming\\)}'\\)\n        for e in upcoming:\n            print\\(f'  {e.title} @ {e.scheduled_at}'\\)\n        \n        ss = SystemService\\(session\\)\n        status = await ss.get_status\\(\\)\n        print\\(f'Open positions: {len\\(status.open_positions\\)}'\\)\n        print\\(f'Pending orders: {len\\(status.pending_orders\\)}'\\)\n        print\\(f'DB size: {status.db_size_mb:.2f} MB'\\)\n        if status.bot_config:\n            print\\(f'Instruments: {status.bot_config.instruments}'\\)\n        \n        print\\('All services OK'\\)\n\nasyncio.run\\(test\\(\\)\\)\n\")",
+      "Bash(which npm && npm --version && which npx && node --version)",
+      "Bash(npm install -g pnpm 2>&1 | tail -3)",
+      "Bash(pnpm create next-app frontend --typescript --tailwind --eslint --app --src-dir --no-turbopack --import-alias \"@/*\" 2>&1 | tail -15)",
+      "Bash(cd /home/doopdeep/00_data_projects/trading_dashboard/frontend && pnpm approve-builds sharp unrs-resolver 2>&1 && pnpm install 2>&1 | tail -5)",
+      "Bash(pnpm add lightweight-charts @tanstack/react-query @tanstack/react-table clsx 2>&1 | tail -5)",
+      "Bash(git checkout -b feat/full-stack-scaffold)",
+      "Bash(cd /home/doopdeep/00_data_projects/trading_dashboard/frontend && pnpm build 2>&1)",
+      "Bash(cd /home/doopdeep/00_data_projects/trading_dashboard/frontend && node -e \"const lc = require\\('lightweight-charts'\\); console.log\\(Object.keys\\(lc\\).filter\\(k => k.includes\\('eries'\\) || k.includes\\('Area'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(pnpm build 2>&1)",
+      "Bash(pnpm lint 2>&1)",
+      "Bash(git add README.md .env.example .gitignore CLAUDE.md .claude/ .github/ backend/app/ backend/requirements.txt backend/pyproject.toml frontend/src/ frontend/package.json frontend/pnpm-lock.yaml frontend/tsconfig.json frontend/next.config.ts frontend/postcss.config.mjs frontend/eslint.config.mjs frontend/.gitignore frontend/public/)"
+    ]
+  }
+}
