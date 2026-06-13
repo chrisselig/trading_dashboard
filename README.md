@@ -26,3 +26,11 @@ pnpm dev
 ```
 
 Dashboard runs at http://localhost:3000, API at http://localhost:8000.
+
+## Deployment
+
+The frontend is deployed on Vercel: https://tradingdashboardforbot.vercel.app/
+
+- **Framework**: Next.js (Vercel preset)
+- **Root Directory**: `frontend/`
+- **Environment Variables**: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` (set in Vercel project settings)
