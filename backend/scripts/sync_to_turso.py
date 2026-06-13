@@ -10,7 +10,6 @@ Requires TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in .env (project root).
 """
 
 import logging
-import os
 import sqlite3
 import sys
 from pathlib import Path

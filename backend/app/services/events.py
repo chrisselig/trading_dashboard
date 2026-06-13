@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlalchemy import text
@@ -52,7 +52,7 @@ class EventService:
         db_events = await self._upcoming_from_db(days=7)
         cal_events = self._upcoming_from_calendar()
         merged = self._merge_events(db_events, cal_events)
-        now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+        now_naive = datetime.now(UTC).replace(tzinfo=None)
         upcoming = sorted(
             [e for e in merged if e.scheduled_at.replace(tzinfo=None) >= now_naive],
             key=lambda e: e.scheduled_at.replace(tzinfo=None),
@@ -79,7 +79,7 @@ class EventService:
         except (json.JSONDecodeError, OSError):
             return []
 
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = datetime.now(UTC).replace(tzinfo=None)
         events: list[EventResponse] = []
         for entry in data.get("events", []):
             scheduled = datetime.fromisoformat(entry["datetime_utc"]).replace(tzinfo=None)

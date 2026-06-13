@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Select, func, select, text
+from sqlalchemy import Select, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.trades import OrderResponse, TradeResponse
@@ -23,8 +23,13 @@ class TradeService:
         limit: int = 50,
         offset: int = 0,
     ) -> list[TradeResponse]:
-        stmt = text(self._build_trades_sql(pair, strategy, status, date_from, date_to, limit, offset))
-        params = self._build_trades_params(pair, strategy, status, date_from, date_to, limit, offset)
+        sql = self._build_trades_sql(
+            pair, strategy, status, date_from, date_to, limit, offset
+        )
+        stmt = text(sql)
+        params = self._build_trades_params(
+            pair, strategy, status, date_from, date_to, limit, offset
+        )
         result = await self._session.execute(stmt, params)
         return [TradeResponse(**dict(row._mapping)) for row in result.all()]
 
