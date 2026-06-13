@@ -265,6 +265,192 @@ jobs:
 
 This requires adding an SSH key as a GitHub secret. Only set up if manual deploys become tedious.
 
+## General Rules
+
+- When the user asks you to create specific files (CLAUDE.md, skills, configs), create them in the same session — do not defer or forget. Treat explicit file creation requests as hard requirements.
+- When the user asks "how do I access X" or "where is X deployed", give the direct URL or command first, then explain details only if asked.
+
+## Testing & Linting
+
+This project uses Python (primary), TypeScript (dashboard), and YAML (configs). Always run `ruff check` and `pytest` after Python changes. For TypeScript, run the build to catch type errors before committing.
+
+Testing is mandatory. Every new feature, bug fix, or refactor must include tests. Do not skip tests or defer them. CI must pass before merging.
+
+### Backend (Python — pytest)
+
+- **Location**: `backend/tests/` — mirror the `app/` structure (e.g., `tests/services/test_trades.py`)
+- **Framework**: pytest with pytest-asyncio for async tests
+- **Run**: `cd backend && python -m pytest tests/ -v`
+- All service logic must be tested. Use an in-memory SQLite DB, not the real bot DB.
+- Test edge cases: empty tables, null fields, boundary values (limit=0, limit=500).
+
+#### Good examples
+
+```python
+# tests/services/test_performance.py
+import pytest
+from app.services.performance import PerformanceService
+
+class TestSharpe:
+    def test_sharpe_with_positive_trades(self):
+        """Sharpe ratio should be positive for consistently profitable trades."""
+        pnls = [10.0, 20.0, 15.0, 25.0, 30.0]
+        result = PerformanceService._sharpe(pnls)
+        assert result > 0
+
+    def test_sharpe_with_single_trade_returns_zero(self):
+        """Need at least 2 trades to calculate standard deviation."""
+        assert PerformanceService._sharpe([10.0]) == 0.0
+
+    def test_sharpe_with_identical_trades_returns_zero(self):
+        """Zero std deviation means Sharpe is undefined, return 0."""
+        assert PerformanceService._sharpe([10.0, 10.0, 10.0]) == 0.0
+
+class TestMaxDrawdown:
+    def test_no_drawdown_when_always_profitable(self):
+        assert PerformanceService._max_drawdown([10, 20, 30]) == 0.0
+
+    def test_drawdown_after_peak(self):
+        result = PerformanceService._max_drawdown([100, -50, -30])
+        assert result == 80.0  # peak=100, trough=20, dd=80
+
+    def test_empty_pnls(self):
+        assert PerformanceService._max_drawdown([]) == 0.0
+```
+
+```python
+# tests/services/test_trades.py
+import pytest
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from app.services.trades import TradeService
+
+@pytest.fixture
+async def session():
+    """Create an in-memory SQLite DB with the trades schema."""
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as conn:
+        await conn.execute(text("""
+            CREATE TABLE trades (
+                id INTEGER PRIMARY KEY, instrument TEXT, side TEXT,
+                quantity REAL, entry_price REAL, exit_price REAL,
+                pnl REAL, opened_at TEXT, closed_at TEXT,
+                strategy TEXT DEFAULT '', notes TEXT,
+                order_id INTEGER, stop_loss REAL, take_profit REAL,
+                pnl_pips REAL, event_id INTEGER,
+                entry_spread_pips REAL, fill_price REAL, slippage_pips REAL
+            )
+        """))
+    async_session = async_sessionmaker(engine, class_=AsyncSession)
+    async with async_session() as s:
+        yield s
+
+@pytest.mark.asyncio
+async def test_get_trades_empty_table(session):
+    service = TradeService(session)
+    trades = await service.get_trades()
+    assert trades == []
+    assert await service.count_trades() == 0
+
+@pytest.mark.asyncio
+async def test_todays_pnl_no_trades(session):
+    service = TradeService(session)
+    assert await service.get_todays_pnl() == 0.0
+```
+
+#### Bad examples — do NOT do this
+
+```python
+# BAD: Testing nothing meaningful
+def test_trade_service_exists():
+    assert TradeService is not None  # This tests nothing
+
+# BAD: No assertions
+async def test_get_trades(session):
+    service = TradeService(session)
+    service.get_trades()  # Forgot to assert or even await
+
+# BAD: Testing implementation details instead of behavior
+def test_build_trades_sql_has_select():
+    sql = service._build_trades_sql(None, None, None, None, None, 50, 0)
+    assert "SELECT" in sql  # Tests SQL string, not query results
+
+# BAD: Using the real bot database in tests
+def test_real_db():
+    conn = sqlite3.connect("/home/doopdeep/.../forex_bot.db")  # Never do this
+
+# BAD: No test isolation — tests depend on each other's state
+class TestTrades:
+    shared_data = []
+    def test_insert(self):
+        self.shared_data.append({"id": 1})
+    def test_read(self):
+        assert len(self.shared_data) == 1  # Fails if test_insert didn't run first
+```
+
+### Frontend (TypeScript — Jest or Vitest)
+
+- **Location**: colocated next to source — `component.test.tsx` beside `component.tsx`
+- **Run**: `cd frontend && pnpm test`
+- Test utility functions, data transformations, and hooks. UI components with React Testing Library.
+
+#### Good examples
+
+```typescript
+// src/lib/formatters.test.ts
+import { formatPnl, formatPips } from "./formatters";
+
+describe("formatPnl", () => {
+  it("formats positive P&L with + sign and green", () => {
+    expect(formatPnl(123.45)).toBe("+$123.45");
+  });
+
+  it("formats negative P&L with - sign", () => {
+    expect(formatPnl(-50.0)).toBe("-$50.00");
+  });
+
+  it("formats zero as $0.00", () => {
+    expect(formatPnl(0)).toBe("$0.00");
+  });
+
+  it("handles null gracefully", () => {
+    expect(formatPnl(null)).toBe("—");
+  });
+});
+```
+
+#### Bad examples — do NOT do this
+
+```typescript
+// BAD: Snapshot test with no thought — breaks on any CSS change
+it("renders", () => {
+  const { container } = render(<TradeTable trades={[]} />);
+  expect(container).toMatchSnapshot();  // Fragile, no intent
+
+// BAD: Testing library internals
+it("uses useState internally", () => {
+  // Don't test React internals, test user-visible behavior
+
+// BAD: No description of what's being tested
+it("works", () => {
+  expect(formatPnl(10)).toBeTruthy();  // What does "works" mean?
+});
+```
+
+### General Testing Rules
+
+1. **Tests must run in CI** — if it's not in the CI pipeline, it doesn't count
+2. **Use descriptive test names** — name should explain the scenario and expected outcome
+3. **One assertion per concept** — test one behavior per test function
+4. **Test boundaries** — empty inputs, nulls, max values, negative numbers
+5. **Never test against production data** — always use fixtures or in-memory DBs
+6. **Tests must be independent** — no shared mutable state, no ordering dependencies
+7. **Run tests before pushing** — `pytest` / `pnpm test` locally before `git push`
+
+## CI/CD
+
+When modifying CI/CD configs, always verify all dependencies (ruff, pytest, etc.) are included in requirements files and that build-time env vars are handled gracefully with fallbacks.
+
 ## Alberta/Canada Notes
 - User is in Mountain Time (America/Edmonton)
 - Display times in Eastern Time (ET) — industry standard for US economic releases
