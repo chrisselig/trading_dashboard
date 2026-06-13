@@ -22,7 +22,7 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r requirements.txt
       - run: python -m ruff check .
-      - run: python -m pytest tests/ -v
+      - run: if [ -d tests ] && find tests -name '*.py' | grep -q .; then python -m pytest tests/ -v; fi
 
   frontend:
     name: Frontend (Next.js)
@@ -43,3 +43,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm build
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}

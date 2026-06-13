@@ -1,0 +1,19 @@
+import { createClient, type Client } from "@libsql/client";
+
+let _client: Client | null = null;
+
+export function turso(): Client {
+  if (!_client) {
+    const url = process.env.TURSO_DATABASE_URL;
+    if (!url) {
+      throw new Error(
+        "TURSO_DATABASE_URL is not set. Add it to .env.local or Vercel environment variables."
+      );
+    }
+    _client = createClient({
+      url,
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    });
+  }
+  return _client;
+}
