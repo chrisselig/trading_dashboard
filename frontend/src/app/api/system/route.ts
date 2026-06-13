@@ -4,14 +4,14 @@ import { turso } from "@/lib/turso";
 export async function GET() {
   const [openPositions, pendingOrders, lastTrade, lastEvent] =
     await Promise.all([
-      turso.execute(
+      turso().execute(
         "SELECT instrument, side, quantity, entry_price, pnl as current_pnl FROM trades WHERE closed_at IS NULL"
       ),
-      turso.execute(
+      turso().execute(
         "SELECT id, instrument, side, order_type, quantity, price, stop_loss, take_profit, strategy, created_at FROM orders WHERE status IN ('PENDING', 'SUBMITTED') ORDER BY created_at DESC"
       ),
-      turso.execute("SELECT MAX(opened_at) as ts FROM trades"),
-      turso.execute("SELECT MAX(scheduled_at) as ts FROM events"),
+      turso().execute("SELECT MAX(opened_at) as ts FROM trades"),
+      turso().execute("SELECT MAX(scheduled_at) as ts FROM events"),
     ]);
 
   return NextResponse.json({

@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     20
   );
 
-  const result = await turso.execute({
+  const result = await turso().execute({
     sql: "SELECT * FROM trades ORDER BY opened_at DESC LIMIT ?",
     args: [limit],
   });

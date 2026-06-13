@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
   const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : "";
 
   const [orders, countResult] = await Promise.all([
-    turso.execute({
+    turso().execute({
       sql: `SELECT * FROM orders ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       args: [...args, limit, offset],
     }),
-    turso.execute({
+    turso().execute({
       sql: `SELECT COUNT(*) as total FROM orders ${where}`,
       args,
     }),

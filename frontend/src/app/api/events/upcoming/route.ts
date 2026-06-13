@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     90
   );
 
-  const result = await turso.execute({
+  const result = await turso().execute({
     sql: "SELECT * FROM events WHERE scheduled_at >= datetime('now') AND scheduled_at <= datetime('now', '+' || ? || ' days') ORDER BY scheduled_at ASC",
     args: [days],
   });

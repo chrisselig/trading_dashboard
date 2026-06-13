@@ -4,19 +4,19 @@ import { turso } from "@/lib/turso";
 export async function GET() {
   const [todayPnl, openTrades, recentTrades, upcomingEvents, equityCurve] =
     await Promise.all([
-      turso.execute(
+      turso().execute(
         "SELECT COALESCE(SUM(pnl), 0) as total FROM trades WHERE date(closed_at) = date('now') AND pnl IS NOT NULL"
       ),
-      turso.execute(
+      turso().execute(
         "SELECT * FROM trades WHERE closed_at IS NULL ORDER BY opened_at DESC"
       ),
-      turso.execute(
+      turso().execute(
         "SELECT * FROM trades ORDER BY opened_at DESC LIMIT 5"
       ),
-      turso.execute(
+      turso().execute(
         "SELECT * FROM events WHERE scheduled_at >= datetime('now') ORDER BY scheduled_at ASC LIMIT 3"
       ),
-      turso.execute(
+      turso().execute(
         "SELECT closed_at, pnl FROM trades WHERE closed_at IS NOT NULL AND pnl IS NOT NULL ORDER BY closed_at ASC"
       ),
     ]);

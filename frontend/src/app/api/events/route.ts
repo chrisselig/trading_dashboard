@@ -10,11 +10,11 @@ export async function GET(request: NextRequest) {
   );
 
   const [upcoming, historical] = await Promise.all([
-    turso.execute({
+    turso().execute({
       sql: "SELECT * FROM events WHERE scheduled_at >= datetime('now') AND scheduled_at <= datetime('now', '+' || ? || ' days') ORDER BY scheduled_at ASC",
       args: [upcomingDays],
     }),
-    turso.execute({
+    turso().execute({
       sql: "SELECT * FROM events WHERE scheduled_at < datetime('now') ORDER BY scheduled_at DESC LIMIT ?",
       args: [historicalLimit],
     }),

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
 
 export async function GET() {
-  const closedResult = await turso.execute(
+  const closedResult = await turso().execute(
     "SELECT pnl FROM trades WHERE closed_at IS NOT NULL AND pnl IS NOT NULL ORDER BY closed_at ASC"
   );
   const closed = closedResult.rows.map((r) => r.pnl as number);
@@ -33,13 +33,13 @@ export async function GET() {
   const grossLoss = Math.abs(losses.reduce((a, b) => a + b, 0));
 
   const [equityResult, pairResult, strategyResult] = await Promise.all([
-    turso.execute(
+    turso().execute(
       "SELECT closed_at, pnl FROM trades WHERE closed_at IS NOT NULL AND pnl IS NOT NULL ORDER BY closed_at ASC"
     ),
-    turso.execute(
+    turso().execute(
       "SELECT instrument as 'group', SUM(pnl) as total_pnl, COUNT(*) as trade_count FROM trades WHERE closed_at IS NOT NULL AND pnl IS NOT NULL GROUP BY instrument ORDER BY total_pnl DESC"
     ),
-    turso.execute(
+    turso().execute(
       "SELECT strategy as 'group', SUM(pnl) as total_pnl, COUNT(*) as trade_count FROM trades WHERE closed_at IS NOT NULL AND pnl IS NOT NULL GROUP BY strategy ORDER BY total_pnl DESC"
     ),
   ]);

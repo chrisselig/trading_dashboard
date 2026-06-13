@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ eventId: string }> }
 ) {
   const { eventId } = await params;
-  const result = await turso.execute({
+  const result = await turso().execute({
     sql: "SELECT * FROM events WHERE id = ?",
     args: [Number(eventId)],
   });
