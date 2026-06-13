@@ -7,3 +7,4 @@ pydantic-settings>=2.0
 pyyaml>=6.0
 libsql-experimental>=0.0.55
 ruff>=0.11
+pytest>=8.0

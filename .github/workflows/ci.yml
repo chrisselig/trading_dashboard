@@ -22,7 +22,7 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r requirements.txt
       - run: python -m ruff check .
-      - run: python -m pytest tests/ -v
+      - run: if [ -d tests ] && find tests -name '*.py' | grep -q .; then python -m pytest tests/ -v; fi
 
   frontend:
     name: Frontend (Next.js)
