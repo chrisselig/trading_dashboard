@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const upcomingDays = Math.min(Number(params.get("upcoming_days") ?? 30), 90);

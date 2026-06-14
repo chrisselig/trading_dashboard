@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const closedResult = await turso().execute(
     "SELECT pnl FROM trades WHERE closed_at IS NOT NULL AND pnl IS NOT NULL ORDER BY closed_at ASC"
