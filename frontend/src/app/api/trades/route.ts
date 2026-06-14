@@ -2,6 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
 import type { InArgs } from "@libsql/client";
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const pair = params.get("pair");
