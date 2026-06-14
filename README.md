@@ -4,28 +4,22 @@ Professional trading dashboard for monitoring the [forex trading bot](https://gi
 
 ## Stack
 
-- **Backend**: FastAPI + SQLAlchemy (reads bot's SQLite DB)
-- **Frontend**: Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
+- **Frontend**: Next.js 16 + TypeScript + Tailwind CSS + shadcn/ui
+- **Database**: Turso (cloud SQLite) — data synced from the bot's local SQLite DB
 - **Charts**: TradingView Lightweight Charts + Recharts
 
 ## Setup
 
 ```bash
-# 1. Copy env
-cp .env.example .env
-# Edit .env to point BOT_DB_PATH to your bot's database
-
-# 2. Backend
-cd backend
-~/anaconda3/envs/forex-bot/bin/python -m uvicorn app.main:app --reload --port 8000
-
-# 3. Frontend
+# 1. Frontend
 cd frontend
+cp .env.local.example .env.local
+# Edit .env.local to set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN
 pnpm install
 pnpm dev
 ```
 
-Dashboard runs at http://localhost:3000, API at http://localhost:8000.
+Dashboard runs at http://localhost:3000.
 
 ## Deployment
 
