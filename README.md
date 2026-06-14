@@ -1,5 +1,7 @@
 # Forex Trading Dashboard
 
+**Live**: https://trading-dashboard-chi-wheat.vercel.app/
+
 Professional trading dashboard for monitoring the [forex trading bot](https://github.com/chrisselig/forex_trading_bot). Trade journal, performance analytics, event schedules, and system status.
 
 ## Stack
@@ -23,7 +25,7 @@ Dashboard runs at http://localhost:3000.
 
 ## Deployment
 
-The frontend is deployed on Vercel: https://tradingdashboardforbot.vercel.app/
+The frontend is deployed on Vercel: https://trading-dashboard-chi-wheat.vercel.app/
 
 - **Framework**: Next.js (Vercel preset)
 - **Root Directory**: `frontend/`
