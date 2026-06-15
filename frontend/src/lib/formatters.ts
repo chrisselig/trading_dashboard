@@ -65,7 +65,7 @@ export function formatCountdown(isoString: string): string {
   const secs = Math.floor((diff % 60000) / 1000);
   if (hours > 24) {
     const days = Math.floor(hours / 24);
-    return `${days}d ${hours % 24}h`;
+    return `${days}d ${hours % 24}h ${mins}m`;
   }
   if (hours > 0) return `${hours}h ${mins}m`;
   if (mins > 0) return `${mins}m ${secs}s`;

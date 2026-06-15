@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS events (
     forecast VARCHAR(50),
     previous VARCHAR(50),
     fred_series VARCHAR(50),
-    created_at DATETIME NOT NULL
+    created_at DATETIME NOT NULL,
+    pairs_json TEXT
 );
 
 CREATE TABLE IF NOT EXISTS orders (
@@ -32,7 +33,8 @@ CREATE TABLE IF NOT EXISTS orders (
     filled_at DATETIME,
     fill_price FLOAT,
     entry_spread_pips FLOAT,
-    slippage_pips FLOAT
+    slippage_pips FLOAT,
+    account_type VARCHAR(10) DEFAULT 'paper'
 );
 
 CREATE TABLE IF NOT EXISTS trades (
@@ -54,5 +56,6 @@ CREATE TABLE IF NOT EXISTS trades (
     notes TEXT,
     entry_spread_pips FLOAT,
     fill_price FLOAT,
-    slippage_pips FLOAT
+    slippage_pips FLOAT,
+    account_type VARCHAR(10) DEFAULT 'paper'
 );

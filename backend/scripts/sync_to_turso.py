@@ -9,9 +9,11 @@ Usage:
 Requires TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in .env (project root).
 """
 
+import json
 import logging
 import sqlite3
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import libsql_experimental as libsql
@@ -38,7 +40,7 @@ TABLES = {
             "id", "ib_order_id", "instrument", "side", "order_type",
             "quantity", "price", "stop_loss", "take_profit", "status",
             "event_id", "strategy", "created_at", "filled_at", "fill_price",
-            "entry_spread_pips", "slippage_pips",
+            "entry_spread_pips", "slippage_pips", "account_type",
         ],
         "conflict_key": "id",
     },
@@ -48,6 +50,7 @@ TABLES = {
             "entry_price", "exit_price", "stop_loss", "take_profit", "pnl",
             "pnl_pips", "event_id", "strategy", "opened_at", "closed_at",
             "notes", "entry_spread_pips", "fill_price", "slippage_pips",
+            "account_type",
         ],
         "conflict_key": "id",
     },
@@ -111,6 +114,55 @@ def sync_table(
     return len(rows)
 
 
+def sync_calendar_pairs(turso_conn: libsql.Connection) -> int:
+    """Read calendar.json and update events in Turso with pairs data."""
+    cal_path = PROJECT_ROOT / "data" / "calendar.json"
+    if not cal_path.exists():
+        log.info("  calendar.json not found, skipping pairs sync")
+        return 0
+
+    try:
+        data = json.loads(cal_path.read_text())
+    except (json.JSONDecodeError, OSError) as e:
+        log.warning("  Failed to read calendar.json: %s", e)
+        return 0
+
+    # Ensure pairs_json column exists
+    try:
+        turso_conn.execute("ALTER TABLE events ADD COLUMN pairs_json TEXT")
+        turso_conn.commit()
+        log.info("  Added pairs_json column to events table")
+    except Exception:
+        pass  # Column already exists
+
+    updated = 0
+    for entry in data.get("events", []):
+        pairs = entry.get("pairs", [])
+        if not pairs:
+            continue
+
+        # Normalize datetime: "2026-06-16T02:30:00Z" -> "2026-06-16 02:30:00"
+        dt_utc = entry.get("datetime_utc", "")
+        try:
+            dt = datetime.fromisoformat(dt_utc.replace("Z", "+00:00"))
+            scheduled_at = dt.strftime("%Y-%m-%d %H:%M:%S")
+        except (ValueError, AttributeError):
+            continue
+
+        pairs_json = json.dumps(pairs)
+        title = entry.get("event", "")
+
+        turso_conn.execute(
+            "UPDATE events SET pairs_json = ? WHERE title = ? AND scheduled_at LIKE ?",
+            (pairs_json, title, f"{scheduled_at}%"),
+        )
+        updated += 1
+
+    turso_conn.commit()
+    log.info("  calendar pairs: %d events updated", updated)
+    return updated
+
+
 def main() -> None:
     env = load_env()
 
@@ -133,6 +185,8 @@ def main() -> None:
         total += sync_table(
             turso_conn, db_path, table, config["columns"], config["conflict_key"]
         )
+
+    sync_calendar_pairs(turso_conn)
 
     log.info("Sync complete: %d total rows across %d tables", total, len(TABLES))
 
