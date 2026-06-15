@@ -135,6 +135,7 @@ def sync_calendar_pairs(turso_conn: libsql.Connection) -> int:
     except Exception:
         pass  # Column already exists
 
+    # Step 1: Exact match — update upcoming events by title + scheduled_at
     updated = 0
     for entry in data.get("events", []):
         pairs = entry.get("pairs", [])
@@ -158,9 +159,26 @@ def sync_calendar_pairs(turso_conn: libsql.Connection) -> int:
         )
         updated += 1
 
+    # Step 2: Country fallback — for events still missing pairs, derive from
+    # the country→pairs mapping in calendar.json so historical events get pairs too
+    country_pairs: dict[str, str] = {}
+    for entry in data.get("events", []):
+        pairs = entry.get("pairs", [])
+        country = entry.get("country", "")
+        if pairs and country and country not in country_pairs:
+            country_pairs[country] = json.dumps(pairs)
+
+    fallback = 0
+    for country, pairs_json in country_pairs.items():
+        result = turso_conn.execute(
+            "UPDATE events SET pairs_json = ? WHERE country = ? AND pairs_json IS NULL",
+            (pairs_json, country),
+        )
+        fallback += result.rowcount
+
     turso_conn.commit()
-    log.info("  calendar pairs: %d events updated", updated)
-    return updated
+    log.info("  calendar pairs: %d exact + %d country-fallback updated", updated, fallback)
+    return updated + fallback
 
 
 def main() -> None:
