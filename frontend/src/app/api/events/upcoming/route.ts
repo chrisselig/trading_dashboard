@@ -15,5 +15,14 @@ export async function GET(request: NextRequest) {
     args: [days],
   });
 
-  return NextResponse.json(result.rows);
+  const enriched = result.rows.map((row) => {
+    const pairsJson = row.pairs_json;
+    let pairs: unknown[] = [];
+    if (typeof pairsJson === "string" && pairsJson) {
+      try { pairs = JSON.parse(pairsJson); } catch { /* ignore */ }
+    }
+    return { ...row, pairs };
+  });
+
+  return NextResponse.json(enriched);
 }
