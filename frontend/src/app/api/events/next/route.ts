@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
+import { enrichEventRow } from "@/lib/events";
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,11 +13,5 @@ export async function GET() {
   const row = result.rows[0];
   if (!row) return NextResponse.json(null);
 
-  const pairsJson = row.pairs_json;
-  let pairs: unknown[] = [];
-  if (typeof pairsJson === "string" && pairsJson) {
-    try { pairs = JSON.parse(pairsJson); } catch { /* ignore */ }
-  }
-
-  return NextResponse.json({ ...row, pairs });
+  return NextResponse.json(enrichEventRow(row));
 }

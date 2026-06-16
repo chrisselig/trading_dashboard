@@ -1,24 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
-import type { Row } from "@libsql/client";
+import { enrichEventRow } from "@/lib/events";
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-function enrichWithPairs(rows: Row[]) {
-  return rows.map((row) => {
-    const pairsJson = row.pairs_json;
-    let pairs: unknown[] = [];
-    if (typeof pairsJson === "string" && pairsJson) {
-      try {
-        pairs = JSON.parse(pairsJson);
-      } catch {
-        /* ignore malformed JSON */
-      }
-    }
-    return { ...row, pairs };
-  });
-}
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -40,7 +25,7 @@ export async function GET(request: NextRequest) {
   ]);
 
   return NextResponse.json({
-    upcoming: enrichWithPairs(upcoming.rows),
-    historical: enrichWithPairs(historical.rows),
+    upcoming: upcoming.rows.map(enrichEventRow),
+    historical: historical.rows.map(enrichEventRow),
   });
 }
