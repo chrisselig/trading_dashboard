@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
+import { enrichEventRow } from "@/lib/events";
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,5 +19,5 @@ export async function GET(
     return NextResponse.json({ detail: "Event not found" }, { status: 404 });
   }
 
-  return NextResponse.json(result.rows[0]);
+  return NextResponse.json(enrichEventRow(result.rows[0]));
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
+import { enrichEventRow } from "@/lib/events";
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,7 +31,7 @@ export async function GET() {
     return { timestamp: row.closed_at as string, equity: cumulative };
   });
 
-  const upcoming = upcomingEvents.rows;
+  const upcoming = upcomingEvents.rows.map(enrichEventRow);
   const nextEvent = upcoming.length > 0 ? upcoming[0] : null;
 
   return NextResponse.json({
