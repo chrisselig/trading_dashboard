@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS orders (
     fill_price FLOAT,
     entry_spread_pips FLOAT,
     slippage_pips FLOAT,
+    commission FLOAT,
     account_type VARCHAR(10) DEFAULT 'paper'
 );
 
@@ -57,5 +58,6 @@ CREATE TABLE IF NOT EXISTS trades (
     entry_spread_pips FLOAT,
     fill_price FLOAT,
     slippage_pips FLOAT,
+    commission FLOAT,
     account_type VARCHAR(10) DEFAULT 'paper'
 );

@@ -100,6 +100,19 @@ const columns: ColumnDef<Trade>[] = [
     },
   },
   {
+    accessorKey: "commission",
+    header: "Comm.",
+    cell: ({ getValue }) => {
+      const v = getValue<number | null>();
+      if (v == null) return "-";
+      return (
+        <span className="text-amber-400">
+          {formatCurrency(-v)}
+        </span>
+      );
+    },
+  },
+  {
     accessorKey: "strategy",
     header: "Strategy",
     cell: ({ getValue }) => {

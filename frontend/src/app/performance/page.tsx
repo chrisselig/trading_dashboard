@@ -24,8 +24,8 @@ export default function PerformancePage() {
     );
   }
 
-  const pnlTrend =
-    data.total_pnl > 0 ? "up" : data.total_pnl < 0 ? "down" : "neutral";
+  const netTrend =
+    data.net_pnl > 0 ? "up" : data.net_pnl < 0 ? "down" : "neutral";
 
   return (
     <div className="space-y-4 p-4 md:p-6">
@@ -35,9 +35,9 @@ export default function PerformancePage() {
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <KpiCard
-          label="Total P&L"
-          value={formatCurrency(data.total_pnl)}
-          trend={pnlTrend}
+          label="Net P&L"
+          value={formatCurrency(data.net_pnl)}
+          trend={netTrend}
         />
         <KpiCard
           label="Win Rate"
@@ -63,8 +63,9 @@ export default function PerformancePage() {
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KpiCard
-          label="Total Trades"
-          value={String(data.trade_count)}
+          label="Gross P&L"
+          value={formatCurrency(data.total_pnl)}
+          trend={data.total_pnl >= 0 ? "up" : "down"}
         />
         <KpiCard
           label="Best Trade"
@@ -77,8 +78,8 @@ export default function PerformancePage() {
           trend="down"
         />
         <KpiCard
-          label="Avg Win / Loss"
-          value={`${formatCurrency(data.avg_win)} / ${formatCurrency(data.avg_loss)}`}
+          label="Commissions"
+          value={formatCurrency(data.total_commission)}
         />
       </div>
 
