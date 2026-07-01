@@ -12,10 +12,13 @@ class PerformanceService:
 
     async def get_performance(self) -> PerformanceResponse:
         closed = await self._get_closed_pnls()
+        total_commission = await self._get_total_commission()
 
         if not closed:
             return PerformanceResponse(
                 total_pnl=0,
+                total_commission=total_commission,
+                net_pnl=-total_commission,
                 trade_count=0,
                 win_count=0,
                 loss_count=0,
@@ -40,6 +43,8 @@ class PerformanceService:
 
         return PerformanceResponse(
             total_pnl=total_pnl,
+            total_commission=total_commission,
+            net_pnl=total_pnl - total_commission,
             trade_count=len(closed),
             win_count=len(wins),
             loss_count=len(losses),
@@ -55,6 +60,14 @@ class PerformanceService:
             pnl_by_pair=await self._pnl_by_group("instrument"),
             pnl_by_strategy=await self._pnl_by_group("strategy"),
         )
+
+    async def _get_total_commission(self) -> float:
+        stmt = text(
+            "SELECT COALESCE(SUM(commission), 0) FROM trades "
+            "WHERE closed_at IS NOT NULL AND commission IS NOT NULL"
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one()
 
     async def _get_closed_pnls(self) -> list[float]:
         stmt = text(

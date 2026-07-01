@@ -14,6 +14,8 @@ class PnlByGroup(BaseModel):
 
 class PerformanceResponse(BaseModel):
     total_pnl: float
+    total_commission: float
+    net_pnl: float
     trade_count: int
     win_count: int
     loss_count: int

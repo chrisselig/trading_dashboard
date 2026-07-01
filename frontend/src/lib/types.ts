@@ -10,6 +10,7 @@ export interface Trade {
   take_profit: number | null;
   pnl: number | null;
   pnl_pips: number | null;
+  commission: number | null;
   event_id: number | null;
   strategy: string;
   opened_at: string;
@@ -36,6 +37,7 @@ export interface Order {
   event_id: number | null;
   strategy: string;
   created_at: string;
+  commission: number | null;
   filled_at: string | null;
   fill_price: number | null;
 }
@@ -53,6 +55,8 @@ export interface PnlByGroup {
 
 export interface Performance {
   total_pnl: number;
+  total_commission: number;
+  net_pnl: number;
   trade_count: number;
   win_count: number;
   loss_count: number;

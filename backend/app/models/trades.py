@@ -17,6 +17,7 @@ class TradeResponse(BaseModel):
     pnl_pips: float | None = None
     event_id: int | None = None
     strategy: str = ""
+    commission: float | None = None
     opened_at: datetime
     closed_at: datetime | None = None
     notes: str | None = None
@@ -41,6 +42,7 @@ class OrderResponse(BaseModel):
     event_id: int | None = None
     strategy: str = ""
     created_at: datetime
+    commission: float | None = None
     filled_at: datetime | None = None
     fill_price: float | None = None
 
